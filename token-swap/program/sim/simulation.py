@@ -16,14 +16,12 @@ class Curve:
         self.A = A  # actually A * n ** (n - 1) because it's an invariant
         self.n = n
         self.fee = fee
-        if p:
-            self.p = p
-        else:
-            self.p = [10 ** 18] * n
-        if isinstance(D, list):
-            self.x = D
-        else:
-            self.x = [D // n * 10 ** 18 // _p for _p in self.p]
+        self.p = p if p else [10 ** 18] * n
+        self.x = (
+            D
+            if isinstance(D, list)
+            else [D // n * 10**18 // _p for _p in self.p]
+        )
         self.tokens = tokens
 
     def xp(self):
@@ -170,17 +168,11 @@ class Curve:
         D2 = self.D()
         self.x = old_balances
 
-        token_amount = (D0 - D2) * self.tokens // D0
-
-        return token_amount
+        return (D0 - D2) * self.tokens // D0
 
     def calc_withdraw_one_coin(self, token_amount, i):
         xp = self.xp()
-        if self.fee:
-            fee = self.fee - self.fee * xp[i] // sum(xp) + 5 * 10 ** 5
-        else:
-            fee = 0
-
+        fee = self.fee - self.fee * xp[i] // sum(xp) + 5 * 10 ** 5 if self.fee else 0
         D0 = self.D()
         D1 = D0 - token_amount * D0 // self.tokens
         dy = xp[i] - self.y_D(i, D1)

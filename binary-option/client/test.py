@@ -9,8 +9,8 @@ balance_data = []
 
 def await_confirmation(client, txn):
     elapsed_time = 0
+    sleep_time = 1
     while elapsed_time < 30:
-        sleep_time = 1
         time.sleep(sleep_time)
         resp = client.get_confirmed_transaction(txn)
         while 'result' not in resp:

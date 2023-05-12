@@ -139,10 +139,9 @@ class BinaryOption():
 
 
     def initialize(self, api_endpoint, escrow_mint, decimals=2, skip_confirmation=True):
-        msg = ""
         # Initalize Clinet
         client = Client(api_endpoint)
-        msg += "Initialized client"
+        msg = "" + "Initialized client"
         # Create account objects
         source_account = Account(self.private_key)
         pool = Account()
@@ -181,7 +180,7 @@ class BinaryOption():
             decimals,
         )
         tx = tx.add(init_binary_option_ix)
-        msg += f" | Creating binary option"
+        msg += " | Creating binary option"
         # Send request
         try:
             response = client.send_transaction(tx, *signers, opts=types.TxOpts(skip_confirmation=skip_confirmation))
@@ -189,8 +188,10 @@ class BinaryOption():
                 {
                     'status': HTTPStatus.OK,
                     'binary_option': str(pool_account),
-                    'msg': msg + f" | Successfully created binary option {str(pool_account)}",
-                    'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
+                    'msg': f"{msg} | Successfully created binary option {str(pool_account)}",
+                    'tx': response.get('result')
+                    if skip_confirmation
+                    else response['result']['transaction']['signatures'],
                 }
             )
         except Exception as e:
@@ -199,9 +200,8 @@ class BinaryOption():
 
 
     def trade(self, api_endpoint, pool_account, buyer_encrypted_private_key, seller_encrypted_private_key, size, buyer_price, seller_price, skip_confirmation=True):
-        msg = ""
         client = Client(api_endpoint)
-        msg += "Initialized client"
+        msg = "" + "Initialized client"
         # Create account objects
         buyer_private_key = list(self.cipher.decrypt(buyer_encrypted_private_key))
         seller_private_key = list(self.cipher.decrypt(seller_encrypted_private_key))
@@ -214,11 +214,11 @@ class BinaryOption():
         signers = [buyer, seller, source_account]
         pool = self.load_binary_option(api_endpoint, pool_account)
         # List non-derived accounts
-        pool_account = PublicKey(pool_account) 
-        escrow_account = PublicKey(pool["escrow"]) 
-        escrow_mint_account = PublicKey(pool["escrow_mint"]) 
-        long_token_mint_account = PublicKey(pool["long_mint"]) 
-        short_token_mint_account = PublicKey(pool["short_mint"]) 
+        pool_account = PublicKey(pool_account)
+        escrow_account = PublicKey(pool["escrow"])
+        escrow_mint_account = PublicKey(pool["escrow_mint"])
+        long_token_mint_account = PublicKey(pool["long_mint"])
+        short_token_mint_account = PublicKey(pool["short_mint"])
         buyer_account = buyer.public_key()
         seller_account = seller.public_key()
         token_account = PublicKey(TOKEN_PROGRAM_ID)
@@ -277,8 +277,10 @@ class BinaryOption():
             return json.dumps(
                 {
                     'status': HTTPStatus.OK,
-                    'msg': msg + f" | Trade successful",
-                    'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
+                    'msg': f"{msg} | Trade successful",
+                    'tx': response.get('result')
+                    if skip_confirmation
+                    else response['result']['transaction']['signatures'],
                 }
             )
         except Exception as e:
@@ -286,16 +288,15 @@ class BinaryOption():
             raise(e)
 
     def settle(self, api_endpoint, pool_account, winning_mint, skip_confirmation=True):
-        msg = ""
         client = Client(api_endpoint)
-        msg += "Initialized client"
+        msg = "" + "Initialized client"
         # Create account objects
         source_account = Account(self.private_key)
         # Signers
         signers = [source_account]
         # List non-derived accounts
-        pool_account = PublicKey(pool_account) 
-        winning_mint_account = PublicKey(winning_mint) 
+        pool_account = PublicKey(pool_account)
+        winning_mint_account = PublicKey(winning_mint)
         tx = Transaction()
         settle_ix = settle_instruction(
             pool_account,
@@ -309,8 +310,10 @@ class BinaryOption():
             return json.dumps(
                 {
                     'status': HTTPStatus.OK,
-                    'msg': msg + f" | Settle successful, winner: {str(winning_mint_account)}",
-                    'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
+                    'msg': f"{msg} | Settle successful, winner: {str(winning_mint_account)}",
+                    'tx': response.get('result')
+                    if skip_confirmation
+                    else response['result']['transaction']['signatures'],
                 }
             )
         except Exception as e:
@@ -318,17 +321,16 @@ class BinaryOption():
             raise(e)
 
     def collect(self, api_endpoint, pool_account, collector, skip_confirmation=True):
-        msg = ""
         client = Client(api_endpoint)
-        msg += "Initialized client"
+        msg = "" + "Initialized client"
         signers = [Account(self.private_key)]
         pool = self.load_binary_option(api_endpoint, pool_account)
-        pool_account = PublicKey(pool_account) 
+        pool_account = PublicKey(pool_account)
         collector_account = PublicKey(collector)
-        escrow_account = PublicKey(pool["escrow"]) 
-        escrow_mint_account = PublicKey(pool["escrow_mint"]) 
-        long_token_mint_account = PublicKey(pool["long_mint"]) 
-        short_token_mint_account = PublicKey(pool["short_mint"]) 
+        escrow_account = PublicKey(pool["escrow"])
+        escrow_mint_account = PublicKey(pool["escrow_mint"])
+        long_token_mint_account = PublicKey(pool["long_mint"])
+        short_token_mint_account = PublicKey(pool["short_mint"])
         token_account = PublicKey(TOKEN_PROGRAM_ID)
         escrow_authority_account = PublicKey.find_program_address(
             [bytes(long_token_mint_account), bytes(short_token_mint_account), bytes(token_account), bytes(PublicKey(BINARY_OPTION_PROGRAM_ID))],
@@ -363,14 +365,16 @@ class BinaryOption():
             escrow_authority_account,
             token_account,
         )
-        tx = tx.add(collect_ix) 
+        tx = tx.add(collect_ix)
         try:
             response = client.send_transaction(tx, *signers, opts=types.TxOpts(skip_confirmation=skip_confirmation))
             return json.dumps(
                 {
                     'status': HTTPStatus.OK,
-                    'msg': msg + f" | Collect successful",
-                    'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
+                    'msg': f"{msg} | Collect successful",
+                    'tx': response.get('result')
+                    if skip_confirmation
+                    else response['result']['transaction']['signatures'],
                 }
             )
         except Exception as e:
@@ -393,12 +397,11 @@ class BinaryOption():
         pubkey = 'B' * 32
         raw_bytes = struct.unpack(f"<BQ?{pubkey}{pubkey}{pubkey}{pubkey}{pubkey}{pubkey}", pool_data)
         i = 0
-        pool = {}
-        pool["decimals"] = raw_bytes[i] 
+        pool = {"decimals": raw_bytes[i]}
         i += 1
-        pool["circulation"] = raw_bytes[i] 
+        pool["circulation"] = raw_bytes[i]
         i += 1
-        pool["settled"] = raw_bytes[i] 
+        pool["settled"] = raw_bytes[i]
         i += 1
         pool["escrow_mint"] = base58.b58encode(bytes(raw_bytes[i:i+32])).decode('ascii')
         i += 32
@@ -445,7 +448,7 @@ class BinaryOption():
             # Generate transaction
             transfer_ix = transfer(TransferParams(from_pubkey=sender_account.public_key(), to_pubkey=dest_account, lamports=lamports))
             tx = tx.add(transfer_ix)
-            msg += f" | Transferring funds"
+            msg += " | Transferring funds"
             # Send request
             try:
                 response = client.send_transaction(tx, *signers, opts=types.TxOpts(skip_confirmation=skip_confirmation))
@@ -468,17 +471,16 @@ class BinaryOption():
             )
             
     def mint_to(self, api_endpoint, pool_account, dest, amount, skip_confirmation=True):
-        msg = ""
         client = Client(api_endpoint)
-        msg += "Initialized client"
+        msg = "" + "Initialized client"
         # Create account objects
         source_account = Account(self.private_key)
         signers = [source_account]
         pool = self.load_binary_option(api_endpoint, pool_account)
         # List non-derived accounts
-        pool_account = PublicKey(pool_account) 
+        pool_account = PublicKey(pool_account)
         dest_account = PublicKey(dest)
-        escrow_mint_account = PublicKey(pool["escrow_mint"]) 
+        escrow_mint_account = PublicKey(pool["escrow_mint"])
         mint_authority_account = source_account.public_key()
         payer_account = source_account.public_key()
         token_account = PublicKey(TOKEN_PROGRAM_ID)
@@ -500,15 +502,17 @@ class BinaryOption():
                 signers=[mint_authority_account],
             )
         )
-        tx = tx.add(mint_to_ix) 
+        tx = tx.add(mint_to_ix)
         # Send request
         try:
             response = client.send_transaction(tx, *signers, opts=types.TxOpts(skip_confirmation=skip_confirmation))
             return json.dumps(
                 {
                     'status': HTTPStatus.OK,
-                    'msg': msg + f" | MintTo {dest} successful",
-                    'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
+                    'msg': f"{msg} | MintTo {dest} successful",
+                    'tx': response.get('result')
+                    if skip_confirmation
+                    else response['result']['transaction']['signatures'],
                 }
             )
         except Exception as e:
