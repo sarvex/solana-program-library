@@ -63,6 +63,6 @@
     "crypto-ts": "^1.0.2",
     "fs": "^0.0.1-security",
     "tweetnacl": "^1.0.3",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^5.0.4"
   }
 }
